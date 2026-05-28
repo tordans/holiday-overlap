@@ -1,15 +1,42 @@
-export const DEFAULT_GANTT = `gantt
-  dateFormat YYYY-MM-DD
-  axisFormat %d.%m.%Y
-  tickInterval 1week
+import type { GanttData } from './gantt-types'
+import { CHANCEN_SECTION } from './gantt-types'
 
-  section Familie_A
-  Sommerferien :a1, 2026-07-15, 2026-08-26
+export { CHANCEN_SECTION }
 
-  section Familie_B
-  Sommerferien :b1, 2026-06-20, 2026-09-05
-
-  section Chancen
-  Besuch moeglich :crit, c1, 2026-07-20, 2026-08-10`
-
-export const CHANCEN_SECTION = 'Chancen'
+export const DEFAULT_GANTT_DATA: GanttData = {
+  sections: [
+    {
+      name: 'Familie_A',
+      ranges: [
+        {
+          id: 'a1',
+          name: 'Sommerferien',
+          start: '2026-07-15',
+          end: '2026-08-26',
+        },
+      ],
+    },
+    {
+      name: 'Familie_B',
+      ranges: [
+        {
+          id: 'b1',
+          name: 'Sommerferien',
+          start: '2026-06-20',
+          end: '2026-09-05',
+        },
+      ],
+    },
+    {
+      name: CHANCEN_SECTION,
+      ranges: [
+        {
+          id: 'c1',
+          name: 'Besuch moeglich',
+          start: '2026-07-20',
+          end: '2026-08-10',
+        },
+      ],
+    },
+  ],
+}

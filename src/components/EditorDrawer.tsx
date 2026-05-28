@@ -1,26 +1,21 @@
 import { useState } from 'react'
 
 import { cn } from '../lib/cn'
-import { insertChance, insertPeriod } from '../lib/gantt-edit'
+import { formatShortDate } from '../lib/gantt-dates'
+import { deleteRange, flattenRows, insertChance, insertRange } from '../lib/gantt-data'
+import type { GanttData } from '../lib/gantt-types'
 
 const inputClass =
   'w-full rounded-lg border border-indigo-100 bg-white px-2.5 py-1.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200/60 focus:outline-none'
 
 type EditorDrawerProps = {
   open: boolean
-  source: string
-  parseError?: string
-  onSourceChange: (source: string) => void
+  data: GanttData
+  onDataChange: (data: GanttData) => void
   onClose: () => void
 }
 
-export function EditorDrawer({
-  open,
-  source,
-  parseError,
-  onSourceChange,
-  onClose,
-}: EditorDrawerProps) {
+export function EditorDrawer({ open, data, onDataChange, onClose }: EditorDrawerProps) {
   const [section, setSection] = useState('')
   const [periodTitle, setPeriodTitle] = useState('')
   const [periodStart, setPeriodStart] = useState('')
@@ -29,18 +24,24 @@ export function EditorDrawer({
   const [chanceStart, setChanceStart] = useState('')
   const [chanceEnd, setChanceEnd] = useState('')
 
+  const rows = flattenRows(data)
+
   function handleAddPeriod(e: React.FormEvent) {
     e.preventDefault()
     if (!section.trim() || !periodTitle.trim() || !periodStart || !periodEnd) return
-    onSourceChange(insertPeriod(source, section, periodTitle, periodStart, periodEnd))
+    onDataChange(insertRange(data, section, periodTitle, periodStart, periodEnd))
     setPeriodTitle('')
   }
 
   function handleAddChance(e: React.FormEvent) {
     e.preventDefault()
     if (!chanceTitle.trim() || !chanceStart || !chanceEnd) return
-    onSourceChange(insertChance(source, chanceTitle, chanceStart, chanceEnd))
+    onDataChange(insertChance(data, chanceTitle, chanceStart, chanceEnd))
     setChanceTitle('')
+  }
+
+  function handleDelete(sectionName: string, rangeId: string) {
+    onDataChange(deleteRange(data, sectionName, rangeId))
   }
 
   return (
@@ -55,7 +56,7 @@ export function EditorDrawer({
     >
       <div className="flex h-full w-96 max-w-[100vw] flex-col">
         <div className="flex items-center justify-between border-b border-indigo-100/80 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-800">Mermaid-Editor</h2>
+          <h2 className="text-sm font-semibold text-slate-800">Editor</h2>
           <button
             type="button"
             onClick={onClose}
@@ -67,19 +68,38 @@ export function EditorDrawer({
         </div>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-          <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
-            Gantt-Quelltext
-            <textarea
-              value={source}
-              onChange={(e) => onSourceChange(e.target.value)}
-              spellCheck={false}
-              className="min-h-[12rem] flex-1 resize-y rounded-xl border border-indigo-100 bg-indigo-50/30 p-3 font-mono text-xs leading-relaxed text-slate-800 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200/60 focus:outline-none"
-            />
-          </label>
-
-          {parseError ? (
-            <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-800">{parseError}</p>
-          ) : null}
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/30 p-3">
+            <h3 className="mb-2 text-xs font-semibold text-indigo-900">Zeiträume</h3>
+            {rows.length === 0 ? (
+              <p className="text-xs text-slate-500">Noch keine Zeiträume.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {rows.map((row) => (
+                  <li
+                    key={`${row.section}-${row.range.id}`}
+                    className="flex items-start gap-2 rounded-lg bg-white/80 px-2 py-1.5 text-xs text-slate-700"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium">{row.section}</span>
+                      <span className="text-slate-400"> · </span>
+                      {row.range.name}
+                      <span className="block text-slate-500">
+                        {formatShortDate(row.range.start)} – {formatShortDate(row.range.end)}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(row.section, row.range.id)}
+                      className="shrink-0 rounded-md px-1.5 py-0.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                      aria-label={`${row.range.name} löschen`}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <form
             onSubmit={handleAddPeriod}

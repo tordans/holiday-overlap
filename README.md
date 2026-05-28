@@ -1,6 +1,6 @@
 # Ferien & Home Exchange Gantt
 
-Vergleiche Urlaubs- und Ferienzeiträume als [Mermaid-Gantt](https://mermaid.ai/open-source/syntax/gantt.html). Der gesamte Chart-Zustand steckt in der URL (`g`, komprimiert) und ist per „Link kopieren“ teilbar.
+Vergleiche Urlaubs- und Ferienzeiträume in einem interaktiven Gantt-Chart. Der gesamte Chart-Zustand steckt in der URL (`g`, LZ-komprimiertes JSON) und ist per „Link kopieren“ teilbar.
 
 ## Entwicklung
 
@@ -20,11 +20,29 @@ bun dev
 
 | Parameter | Beschreibung |
 |-----------|--------------|
-| `g` | LZ-komprimierter Mermaid-Gantt-Quelltext |
+| `g` | LZ-komprimiertes JSON mit Gantt-Daten |
 | `editor` | `open` oder `closed` — linkes Editor-Panel |
 
-## Mermaid-Tipps
+## Datenformat
 
-- Jede Familie/Ort = eigene `section` mit explizitem Start- und Enddatum (`:id, 2026-07-15, 2026-08-26`)
-- Chancen/Besuchsfenster in `section Chancen` mit `crit`-Tag
-- Keine `after`-Verkettung zwischen Ferienzeilen, sonst verschiebt Mermaid die Balken sequentiell
+```json
+{
+  "sections": [
+    {
+      "name": "Familie_A",
+      "ranges": [
+        { "id": "a1", "name": "Sommerferien", "start": "2026-07-15", "end": "2026-08-26" }
+      ]
+    },
+    {
+      "name": "Chancen",
+      "ranges": [
+        { "id": "c1", "name": "Besuch moeglich", "start": "2026-07-20", "end": "2026-08-10" }
+      ]
+    }
+  ]
+}
+```
+
+- Jede Familie/Ort = eigene `section` mit explizitem Start- und Enddatum
+- Chancen/Besuchsfenster in `section Chancen` (werden hervorgehoben dargestellt)

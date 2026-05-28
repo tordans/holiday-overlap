@@ -39,106 +39,82 @@ body {
   min-height: 100dvh;
 }
 
-.gantt-chart svg {
+.gantt-chart {
+  user-select: none;
+}
+
+.gantt-svg {
   display: block;
-  width: auto;
-  height: auto;
-  max-width: none;
 }
 
-.gantt-chart .titleText {
-  display: none;
-}
-
-/* Grid & axis — soft, minimal */
-.gantt-chart .grid .tick {
+.gantt-week-line {
   stroke: #e0e7ff;
+  stroke-width: 1;
   opacity: 0.85;
   shape-rendering: crispEdges;
 }
 
-.gantt-chart .grid path {
-  stroke: #eef2ff;
-  stroke-width: 0;
+.gantt-month-line {
+  stroke: #c7d2fe;
+  stroke-width: 1.5;
+  opacity: 0.95;
+  shape-rendering: crispEdges;
 }
 
-.gantt-chart .tick text,
-.gantt-chart text.taskText {
+.gantt-axis-baseline {
+  stroke: #eef2ff;
+  stroke-width: 1;
+}
+
+.gantt-axis-label {
   fill: #64748b;
+  font-size: 12px;
   font-family: var(--font-sans);
 }
 
-.gantt-chart .sectionTitle {
-  fill: #475569 !important;
+.gantt-section-label {
+  fill: #475569;
+  font-size: 14px;
   font-weight: 600;
+  font-family: var(--font-sans);
 }
 
-/* Vacation bars — indigo / violet / sky / fuchsia rotation */
-.gantt-chart .task0 .taskBar,
-.gantt-chart .task1 .taskBar,
-.gantt-chart .task2 .taskBar,
-.gantt-chart .task3 .taskBar {
-  rx: 4;
-  ry: 4;
-}
-
-.gantt-chart .task0 .taskBar {
-  fill: #818cf8 !important;
-  stroke: #6366f1;
-  stroke-width: 1;
-}
-
-.gantt-chart .task1 .taskBar {
-  fill: #a78bfa !important;
-  stroke: #8b5cf6;
-  stroke-width: 1;
-}
-
-.gantt-chart .task2 .taskBar {
-  fill: #67e8f9 !important;
-  stroke: #22d3ee;
-  stroke-width: 1;
-}
-
-.gantt-chart .task3 .taskBar {
-  fill: #f0abfc !important;
-  stroke: #e879f9;
-  stroke-width: 1;
-}
-
-.gantt-chart .task0 .taskText,
-.gantt-chart .task1 .taskText,
-.gantt-chart .task2 .taskText,
-.gantt-chart .task3 .taskText,
-.gantt-chart .taskTextOutsideRight,
-.gantt-chart .taskTextOutsideLeft {
-  fill: #ffffff !important;
-  font-weight: 500;
-}
-
-/* Chance windows — emerald highlight */
-.gantt-chart .task.crit0 .taskBar,
-.gantt-chart .task.crit1 .taskBar,
-.gantt-chart .task.crit2 .taskBar,
-.gantt-chart .task.crit3 .taskBar,
-.gantt-chart .task.crit .taskBar {
-  fill: var(--color-chance) !important;
-  stroke: var(--color-chance-deep);
-  stroke-width: 1;
+.gantt-bar-chance .gantt-bar-rect {
   filter: drop-shadow(0 1px 2px rgb(16 185 129 / 0.35));
 }
 
-.gantt-chart .task.crit0 .taskText,
-.gantt-chart .task.crit1 .taskText,
-.gantt-chart .task.crit2 .taskText,
-.gantt-chart .task.crit3 .taskText,
-.gantt-chart .task.crit .taskText {
-  fill: #ffffff !important;
+.gantt-bar-label {
+  font-family: var(--font-sans);
+  pointer-events: none;
 }
 
-/* Today marker */
-.gantt-chart .today {
+.gantt-chance-highlight {
+  fill: rgb(52 211 153 / 0.14);
+}
+
+.gantt-chance-border {
+  stroke: var(--color-chance-deep);
+  stroke-width: 2;
+  opacity: 0.85;
+  shape-rendering: crispEdges;
+}
+
+.gantt-today-line {
   stroke: #f472b6;
   stroke-width: 2;
   opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.gantt-empty-label {
+  fill: #94a3b8;
+  font-size: 14px;
+  font-family: var(--font-sans);
+}
+
+.gantt-date-label {
+  fill: #94a3b8;
+  font-size: 10px;
+  font-family: var(--font-sans);
+  pointer-events: none;
 }

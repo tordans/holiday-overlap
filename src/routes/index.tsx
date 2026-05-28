@@ -5,9 +5,10 @@ import { EditorDrawer } from '../components/EditorDrawer'
 import { GanttChart } from '../components/GanttChart'
 import { ShareButton } from '../components/ShareButton'
 import { cn } from '../lib/cn'
-import { DEFAULT_GANTT } from '../lib/constants'
+import { DEFAULT_GANTT_DATA } from '../lib/constants'
+import { extractYears, formatYearRange } from '../lib/gantt-data'
 import { searchSchema, type SearchParams } from '../lib/search-schema'
-import { extractYearsFromGantt, formatYearRange } from '../lib/gantt-meta'
+import type { GanttData } from '../lib/gantt-types'
 import { decodeGantt, encodeGantt } from '../lib/url-gantt'
 
 export const Route = createFileRoute('/')({
@@ -23,23 +24,19 @@ function defaultEditorOpen(): SearchParams['editor'] {
 function HomePage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/' })
-  const [source, setSource] = useState(() => decodeGantt(search.g))
-  const [parseError, setParseError] = useState<string | undefined>()
+  const [data, setData] = useState<GanttData>(() => decodeGantt(search.g))
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initializedRef = useRef(false)
 
   const editorOpen = (search.editor ?? defaultEditorOpen()) === 'open'
-  const yearLabel = useMemo(
-    () => formatYearRange(extractYearsFromGantt(source)),
-    [source],
-  )
+  const yearLabel = useMemo(() => formatYearRange(extractYears(data)), [data])
 
   useEffect(() => {
     if (!search.g && !initializedRef.current) {
       initializedRef.current = true
       void navigate({
         search: {
-          g: encodeGantt(DEFAULT_GANTT),
+          g: encodeGantt(DEFAULT_GANTT_DATA),
           editor: search.editor ?? defaultEditorOpen(),
         },
         replace: true,
@@ -49,18 +46,18 @@ function HomePage() {
 
   useEffect(() => {
     if (search.g) {
-      setSource(decodeGantt(search.g))
+      setData(decodeGantt(search.g))
     }
   }, [search.g])
 
   const syncToUrl = useCallback(
-    (nextSource: string) => {
+    (nextData: GanttData) => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
         void navigate({
           search: (prev) => ({
             ...prev,
-            g: encodeGantt(nextSource),
+            g: encodeGantt(nextData),
           }),
           replace: true,
         })
@@ -69,9 +66,9 @@ function HomePage() {
     [navigate],
   )
 
-  function handleSourceChange(nextSource: string) {
-    setSource(nextSource)
-    syncToUrl(nextSource)
+  function handleDataChange(nextData: GanttData) {
+    setData(nextData)
+    syncToUrl(nextData)
   }
 
   function setEditorOpen(open: boolean) {
@@ -83,10 +80,6 @@ function HomePage() {
       replace: true,
     })
   }
-
-  const handleParseError = useCallback((error: string | undefined) => {
-    setParseError(error)
-  }, [])
 
   return (
     <div className="flex h-dvh flex-col">
@@ -120,13 +113,12 @@ function HomePage() {
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <EditorDrawer
           open={editorOpen}
-          source={source}
-          parseError={parseError}
-          onSourceChange={handleSourceChange}
+          data={data}
+          onDataChange={handleDataChange}
           onClose={() => setEditorOpen(false)}
         />
         <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <GanttChart source={source} className="flex-1" onError={handleParseError} />
+          <GanttChart data={data} className="flex-1" />
         </main>
       </div>
     </div>
