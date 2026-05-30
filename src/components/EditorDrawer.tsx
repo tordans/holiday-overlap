@@ -1,9 +1,23 @@
 import { useState } from 'react'
 
 import { cn } from '../lib/cn'
-import { formatShortDate } from '../lib/gantt-dates'
-import { deleteRange, flattenRows, insertChance, insertRange } from '../lib/gantt-data'
+import {
+  deleteRange,
+  deleteSection,
+  extractYears,
+  insertChance,
+  insertRange,
+  rangeHighlightKey,
+} from '../lib/gantt-data'
+import { ZeitraeumeSectionGroup } from './ZeitraeumeSectionGroup'
 import type { GanttData } from '../lib/gantt-types'
+import { applyPeriodsToGantt } from '../lib/holidays/apply-periods'
+import {
+  BUNDESLAENDER,
+  DEFAULT_BUNDESLAND_CODE,
+  bundeslandByCode,
+} from '../lib/holidays/bundeslaender'
+import { fetchSchoolAndPublicHolidays } from '../lib/holidays/fetch-periods'
 
 const inputClass =
   'w-full rounded-lg border border-indigo-100 bg-white px-2.5 py-1.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200/60 focus:outline-none'
@@ -13,9 +27,18 @@ type EditorDrawerProps = {
   data: GanttData
   onDataChange: (data: GanttData) => void
   onClose: () => void
+  highlightedRangeKey: string | null
+  onHighlightRangeKey: (key: string | null) => void
 }
 
-export function EditorDrawer({ open, data, onDataChange, onClose }: EditorDrawerProps) {
+export function EditorDrawer({
+  open,
+  data,
+  onDataChange,
+  onClose,
+  highlightedRangeKey,
+  onHighlightRangeKey,
+}: EditorDrawerProps) {
   const [section, setSection] = useState('')
   const [periodTitle, setPeriodTitle] = useState('')
   const [periodStart, setPeriodStart] = useState('')
@@ -24,7 +47,19 @@ export function EditorDrawer({ open, data, onDataChange, onClose }: EditorDrawer
   const [chanceStart, setChanceStart] = useState('')
   const [chanceEnd, setChanceEnd] = useState('')
 
-  const rows = flattenRows(data)
+  const defaultYear = () => {
+    const years = extractYears(data)
+    return years.length > 0 ? years[years.length - 1] : new Date().getFullYear()
+  }
+
+  const [bundeslandCode, setBundeslandCode] = useState(DEFAULT_BUNDESLAND_CODE)
+  const [holidayYear, setHolidayYear] = useState(() => defaultYear())
+  const [includePublicHolidays, setIncludePublicHolidays] = useState(false)
+  const [replaceExisting, setReplaceExisting] = useState(true)
+  const [holidayLoading, setHolidayLoading] = useState(false)
+  const [holidayError, setHolidayError] = useState<string | null>(null)
+
+  const sectionNames = data.sections.map((s) => s.name)
 
   function handleAddPeriod(e: React.FormEvent) {
     e.preventDefault()
@@ -41,7 +76,64 @@ export function EditorDrawer({ open, data, onDataChange, onClose }: EditorDrawer
   }
 
   function handleDelete(sectionName: string, rangeId: string) {
+    const key = rangeHighlightKey(sectionName, rangeId)
+    if (highlightedRangeKey === key) {
+      onHighlightRangeKey(null)
+    }
     onDataChange(deleteRange(data, sectionName, rangeId))
+  }
+
+  function handleDeleteSection(sectionName: string, rangeCount: number) {
+    if (rangeCount > 1) {
+      const confirmed = window.confirm(
+        `Gruppe „${sectionName}“ mit ${rangeCount} Zeiträumen wirklich löschen?`,
+      )
+      if (!confirmed) return
+    }
+
+    const sectionKeys = data.sections
+      .find((s) => s.name.toLowerCase() === sectionName.toLowerCase())
+      ?.ranges.map((r) => rangeHighlightKey(sectionName, r.id))
+
+    if (sectionKeys?.some((key) => key === highlightedRangeKey)) {
+      onHighlightRangeKey(null)
+    }
+
+    onDataChange(deleteSection(data, sectionName))
+  }
+
+  async function handleLoadHolidays(e: React.FormEvent) {
+    e.preventDefault()
+    const targetSection = section.trim()
+    if (!targetSection) return
+
+    const land = bundeslandByCode(bundeslandCode)
+    if (!land) return
+
+    setHolidayLoading(true)
+    setHolidayError(null)
+
+    try {
+      const periods = await fetchSchoolAndPublicHolidays(
+        land.slug,
+        holidayYear,
+        includePublicHolidays,
+      )
+      if (periods.length === 0) {
+        setHolidayError('Keine Ferien für dieses Jahr gefunden.')
+        return
+      }
+      onDataChange(
+        applyPeriodsToGantt(data, targetSection, periods, {
+          replace: replaceExisting,
+          year: holidayYear,
+        }),
+      )
+    } catch {
+      setHolidayError('Ferien konnten nicht geladen werden. Bitte später erneut versuchen.')
+    } finally {
+      setHolidayLoading(false)
+    }
   }
 
   return (
@@ -70,36 +162,101 @@ export function EditorDrawer({ open, data, onDataChange, onClose }: EditorDrawer
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
           <div className="rounded-xl border border-indigo-100 bg-indigo-50/30 p-3">
             <h3 className="mb-2 text-xs font-semibold text-indigo-900">Zeiträume</h3>
-            {rows.length === 0 ? (
+            {data.sections.length === 0 ? (
               <p className="text-xs text-slate-500">Noch keine Zeiträume.</p>
             ) : (
-              <ul className="space-y-1.5">
-                {rows.map((row) => (
-                  <li
-                    key={`${row.section}-${row.range.id}`}
-                    className="flex items-start gap-2 rounded-lg bg-white/80 px-2 py-1.5 text-xs text-slate-700"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <span className="font-medium">{row.section}</span>
-                      <span className="text-slate-400"> · </span>
-                      {row.range.name}
-                      <span className="block text-slate-500">
-                        {formatShortDate(row.range.start)} – {formatShortDate(row.range.end)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(row.section, row.range.id)}
-                      className="shrink-0 rounded-md px-1.5 py-0.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
-                      aria-label={`${row.range.name} löschen`}
-                    >
-                      ✕
-                    </button>
-                  </li>
+              <div className="space-y-2">
+                {data.sections.map((section, sectionIndex) => (
+                  <ZeitraeumeSectionGroup
+                    key={section.name}
+                    section={section}
+                    sectionIndex={sectionIndex}
+                    data={data}
+                    sectionNames={sectionNames}
+                    highlightedRangeKey={highlightedRangeKey}
+                    onDataChange={onDataChange}
+                    onHighlightRangeKey={onHighlightRangeKey}
+                    onDeleteRange={handleDelete}
+                    onDeleteSection={handleDeleteSection}
+                  />
                 ))}
-              </ul>
+              </div>
             )}
           </div>
+
+          <form
+            onSubmit={handleLoadHolidays}
+            className="space-y-2 rounded-xl border border-violet-200/80 bg-gradient-to-br from-violet-50/80 to-indigo-50/50 p-3"
+          >
+            <h3 className="text-xs font-semibold text-violet-900">Ferien aus API laden</h3>
+            <input
+              placeholder="Section (z. B. Familie_A)"
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+              className={inputClass}
+            />
+            <select
+              value={bundeslandCode}
+              onChange={(e) => setBundeslandCode(e.target.value)}
+              className={inputClass}
+            >
+              {BUNDESLAENDER.map((land) => (
+                <option key={land.code} value={land.code}>
+                  {land.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={2020}
+              max={2035}
+              value={holidayYear}
+              onChange={(e) => setHolidayYear(Number.parseInt(e.target.value, 10) || defaultYear())}
+              className={inputClass}
+              aria-label="Jahr"
+            />
+            <label className="flex items-center gap-2 text-xs text-slate-600">
+              <input
+                type="checkbox"
+                checked={includePublicHolidays}
+                onChange={(e) => setIncludePublicHolidays(e.target.checked)}
+                className="rounded border-indigo-200 text-indigo-600 focus:ring-indigo-300"
+              />
+              Gesetzliche Feiertage mit laden
+            </label>
+            <label className="flex items-center gap-2 text-xs text-slate-600">
+              <input
+                type="checkbox"
+                checked={replaceExisting}
+                onChange={(e) => setReplaceExisting(e.target.checked)}
+                className="rounded border-indigo-200 text-indigo-600 focus:ring-indigo-300"
+              />
+              Bestehende Zeiträume in dieser Sektion ersetzen
+            </label>
+            {holidayError ? (
+              <p className="text-xs text-rose-600" role="alert">
+                {holidayError}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              disabled={holidayLoading || !section.trim()}
+              className="w-full rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 py-2 text-sm font-medium text-white shadow-sm transition hover:from-violet-600 hover:to-indigo-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {holidayLoading ? 'Lädt…' : 'Ferien laden'}
+            </button>
+            <p className="text-[10px] text-slate-500">
+              Daten:{' '}
+              <a
+                href="https://www.mehr-schulferien.de"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 underline hover:text-indigo-800"
+              >
+                mehr-schulferien.de
+              </a>
+            </p>
+          </form>
 
           <form
             onSubmit={handleAddPeriod}

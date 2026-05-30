@@ -1,3 +1,12 @@
+import {
+  addCalendarDays,
+  daysBetween,
+  endOfIsoWeek,
+  parseIsoDate,
+  startOfCalendarMonth,
+  startOfIsoWeek,
+  today,
+} from './dates'
 import { formatMonthLabel } from './gantt-dates'
 import type { FlatGanttRow } from './gantt-types'
 
@@ -33,7 +42,6 @@ export type GanttLayoutInput = {
 export type WeekBand = {
   start: Date
   end: Date
-  weekIndex: number
 }
 
 export type WeekendBand = {
@@ -78,63 +86,28 @@ export type GanttLayout = {
   bodyBottom: number
 }
 
-function parseIso(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
-
-function addDays(date: Date, days: number): Date {
-  const next = new Date(date)
-  next.setDate(next.getDate() + days)
-  return next
-}
-
-function startOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-/** ISO 8601 week: Monday is the first day (getDay: 0=Sun … 6=Sat). */
-function startOfIsoWeek(date: Date): Date {
-  const d = startOfDay(date)
-  const daysFromMonday = (d.getDay() + 6) % 7
-  return addDays(d, -daysFromMonday)
-}
-
-function endOfIsoWeek(date: Date): Date {
-  return addDays(startOfIsoWeek(date), 7)
-}
-
-function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1)
-}
-
-function daysBetween(a: Date, b: Date): number {
-  const ms = startOfDay(b).getTime() - startOfDay(a).getTime()
-  return ms / (1000 * 60 * 60 * 24)
-}
-
 export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
-  const { rows, containerWidth, containerHeight } = input
+  const { rows, containerWidth } = input
   if (rows.length === 0) return null
 
-  let minStart = parseIso(rows[0].range.start)
-  let maxEnd = parseIso(rows[0].range.end)
+  let minStart = parseIsoDate(rows[0].range.start)
+  let maxEnd = parseIsoDate(rows[0].range.end)
 
   for (const row of rows) {
-    const start = parseIso(row.range.start)
-    const end = parseIso(row.range.end)
+    const start = parseIsoDate(row.range.start)
+    const end = parseIsoDate(row.range.end)
     if (start < minStart) minStart = start
     if (end > maxEnd) maxEnd = end
   }
 
-  const domainStart = startOfIsoWeek(addDays(minStart, -7))
-  const domainEnd = endOfIsoWeek(addDays(maxEnd, 7))
+  const domainStart = startOfIsoWeek(addCalendarDays(minStart, -7))
+  const domainEnd = endOfIsoWeek(addCalendarDays(maxEnd, 7))
   const totalDays = Math.max(1, daysBetween(domainStart, domainEnd))
 
   const rowCount = rows.length
   const rowHeight = ROW_MIN
   const bodyBottom = TOP_PAD + rowCount * rowHeight
-  const svgHeight = Math.max(containerHeight, bodyBottom)
+  const svgHeight = bodyBottom
 
   const availableWidth = Math.max(containerWidth, MIN_CHART_WIDTH)
   const chartWidth = availableWidth - LEFT_PAD - RIGHT_PAD
@@ -145,7 +118,7 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
     return LEFT_PAD + (days / totalDays) * chartWidth
   }
 
-  const xScaleFromIso = (iso: string): number => xScale(parseIso(iso))
+  const xScaleFromIso = (iso: string): number => xScale(parseIsoDate(iso))
 
   const barWidth = (startIso: string, endIso: string): number => {
     const start = xScaleFromIso(startIso)
@@ -157,28 +130,26 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
 
   const weekBands: WeekBand[] = []
   let weekStart = startOfIsoWeek(domainStart)
-  let weekIndex = 0
   while (weekStart < domainEnd) {
-    const weekEnd = addDays(weekStart, 7)
-    weekBands.push({ start: weekStart, end: weekEnd, weekIndex })
+    const weekEnd = addCalendarDays(weekStart, 7)
+    weekBands.push({ start: weekStart, end: weekEnd })
     weekStart = weekEnd
-    weekIndex++
   }
 
   const weekendBands: WeekendBand[] = []
   for (const week of weekBands) {
-    const saturday = addDays(week.start, 5)
-    const sundayEnd = addDays(week.start, 7)
+    const saturday = addCalendarDays(week.start, 5)
+    const sundayEnd = addCalendarDays(week.start, 7)
     if (saturday < domainEnd && sundayEnd > domainStart) {
       weekendBands.push({ start: saturday, end: sundayEnd })
     }
   }
 
   const monthTicks: MonthTick[] = []
-  let monthCursor = startOfMonth(domainStart)
+  let monthCursor = startOfCalendarMonth(domainStart)
   while (monthCursor <= domainEnd) {
     monthTicks.push({ date: monthCursor, label: formatMonthLabel(monthCursor) })
-    monthCursor = startOfMonth(addDays(monthCursor, 32))
+    monthCursor = startOfCalendarMonth(addCalendarDays(monthCursor, 32))
   }
 
   const weekTicks: WeekTick[] = []
@@ -186,9 +157,9 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
     weekTicks.push({ date: week.start })
   }
 
-  const today = startOfDay(new Date())
+  const todayDate = today()
   const todayX =
-    today >= domainStart && today <= domainEnd ? xScale(today) : null
+    todayDate >= domainStart && todayDate <= domainEnd ? xScale(todayDate) : null
 
   const chanceBands: ChanceBand[] = rows
     .filter((row) => row.kind === 'chance')
@@ -219,6 +190,13 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
     todayX,
     bodyBottom,
   }
+}
+
+export function dateFromChartX(layout: GanttLayout, chartX: number): Date | null {
+  if (chartX < LEFT_PAD || chartX > LEFT_PAD + layout.chartWidth) return null
+  const dayOffset = Math.round(((chartX - LEFT_PAD) / layout.chartWidth) * layout.totalDays)
+  const clamped = Math.max(0, Math.min(layout.totalDays, dayOffset))
+  return addCalendarDays(layout.domainStart, clamped)
 }
 
 export function barGeometry(

@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { EditorDrawer } from '../components/EditorDrawer'
 import { GanttChart } from '../components/GanttChart'
 import { ShareButton } from '../components/ShareButton'
 import { cn } from '../lib/cn'
 import { DEFAULT_GANTT_DATA } from '../lib/constants'
-import { extractYears, formatYearRange } from '../lib/gantt-data'
+import { extractYears, flattenRows, formatYearRange, rangeHighlightKey } from '../lib/gantt-data'
 import { searchSchema, type SearchParams } from '../lib/search-schema'
 import type { GanttData } from '../lib/gantt-types'
 import { decodeGantt, encodeGantt } from '../lib/url-gantt'
@@ -26,9 +26,11 @@ function HomePage() {
   const navigate = useNavigate({ from: '/' })
   const [data, setData] = useState<GanttData>(() => decodeGantt(search.g))
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingEncodedRef = useRef<string | null>(null)
   const initializedRef = useRef(false)
 
   const editorOpen = (search.editor ?? defaultEditorOpen()) === 'open'
+  const [highlightedRangeKey, setHighlightedRangeKey] = useState<string | null>(null)
   const yearLabel = useMemo(() => formatYearRange(extractYears(data)), [data])
 
   useEffect(() => {
@@ -45,30 +47,45 @@ function HomePage() {
   }, [search.g, search.editor, navigate])
 
   useEffect(() => {
-    if (search.g) {
-      setData(decodeGantt(search.g))
+    if (!search.g) return
+
+    if (pendingEncodedRef.current !== null) {
+      if (search.g === pendingEncodedRef.current) {
+        pendingEncodedRef.current = null
+      }
+      return
     }
+
+    setData(decodeGantt(search.g))
   }, [search.g])
 
-  const syncToUrl = useCallback(
-    (nextData: GanttData) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
-        void navigate({
-          search: (prev) => ({
-            ...prev,
-            g: encodeGantt(nextData),
-          }),
-          replace: true,
-        })
-      }, 400)
-    },
-    [navigate],
-  )
+  useEffect(() => {
+    if (!editorOpen) setHighlightedRangeKey(null)
+  }, [editorOpen])
+
+  useEffect(() => {
+    if (!highlightedRangeKey) return
+    const exists = flattenRows(data).some(
+      (row) => rangeHighlightKey(row.section, row.range.id) === highlightedRangeKey,
+    )
+    if (!exists) setHighlightedRangeKey(null)
+  }, [data, highlightedRangeKey])
 
   function handleDataChange(nextData: GanttData) {
+    const encoded = encodeGantt(nextData)
+    pendingEncodedRef.current = encoded
     setData(nextData)
-    syncToUrl(nextData)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      void navigate({
+        search: (prev) => ({
+          ...prev,
+          g: encoded,
+        }),
+        replace: true,
+      })
+    }, 400)
   }
 
   function setEditorOpen(open: boolean) {
@@ -116,9 +133,15 @@ function HomePage() {
           data={data}
           onDataChange={handleDataChange}
           onClose={() => setEditorOpen(false)}
+          highlightedRangeKey={highlightedRangeKey}
+          onHighlightRangeKey={setHighlightedRangeKey}
         />
         <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <GanttChart data={data} className="flex-1" />
+          <GanttChart
+            data={data}
+            highlightedRangeKey={highlightedRangeKey}
+            className="flex-1"
+          />
         </main>
       </div>
     </div>

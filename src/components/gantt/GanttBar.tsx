@@ -1,3 +1,4 @@
+import { cn } from '../../lib/cn'
 import { formatBarLabel, formatShortDate } from '../../lib/gantt-dates'
 import { computeLabelLayout } from '../../lib/gantt-labels'
 import {
@@ -13,9 +14,10 @@ type GanttBarProps = {
   row: FlatGanttRow
   rowIndex: number
   layout: GanttLayout
+  highlighted?: boolean
 }
 
-export function GanttBar({ row, rowIndex, layout }: GanttBarProps) {
+export function GanttBar({ row, rowIndex, layout, highlighted = false }: GanttBarProps) {
   const { x, y, width, height, dateY } = barGeometry(
     layout,
     rowIndex,
@@ -41,7 +43,14 @@ export function GanttBar({ row, rowIndex, layout }: GanttBarProps) {
   const endDateX = x + width
 
   return (
-    <g className={row.kind === 'chance' ? 'gantt-bar gantt-bar-chance' : 'gantt-bar'}>
+    <g
+      className={
+        row.kind === 'chance'
+          ? cn('gantt-bar gantt-bar-chance', highlighted && 'gantt-bar-highlighted')
+          : cn('gantt-bar', highlighted && 'gantt-bar-highlighted')
+      }
+      pointerEvents="none"
+    >
       <rect
         x={x}
         y={y}

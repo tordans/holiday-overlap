@@ -6,10 +6,11 @@ import { GanttSvg } from './gantt/GanttSvg'
 
 type GanttChartProps = {
   data: GanttData
+  highlightedRangeKey?: string | null
   className?: string
 }
 
-export function GanttChart({ data, className }: GanttChartProps) {
+export function GanttChart({ data, highlightedRangeKey = null, className }: GanttChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 800, height: 400 })
 
@@ -39,7 +40,12 @@ export function GanttChart({ data, className }: GanttChartProps) {
         className,
       )}
     >
-      <GanttSvg data={data} width={size.width} height={size.height} />
+      <GanttSvg
+        data={data}
+        width={size.width}
+        height={size.height}
+        highlightedRangeKey={highlightedRangeKey}
+      />
     </div>
   )
 }

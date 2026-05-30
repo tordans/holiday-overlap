@@ -1,5 +1,5 @@
 import type { GanttLayout } from '../../lib/gantt-layout'
-import { LEFT_PAD } from '../../lib/gantt-layout'
+import { LEFT_PAD, RIGHT_PAD } from '../../lib/gantt-layout'
 
 type GanttGridProps = {
   layout: GanttLayout
@@ -8,25 +8,18 @@ type GanttGridProps = {
 export function GanttGrid({ layout }: GanttGridProps) {
   const gridTop = 0
   const gridBottom = layout.svgHeight
+  const chartX = LEFT_PAD
+  const chartWidth = layout.chartWidth
 
   return (
     <g className="gantt-grid">
-      {layout.weekBands.map((week) => {
-        const x1 = layout.xScale(week.start)
-        const x2 = layout.xScale(week.end)
-        const width = x2 - x1
-        const fill = week.weekIndex % 2 === 0 ? '#f8fafc' : '#eef2ff'
-        return (
-          <rect
-            key={`week-${week.start.toISOString()}`}
-            x={x1}
-            y={gridTop}
-            width={width}
-            height={gridBottom - gridTop}
-            fill={fill}
-          />
-        )
-      })}
+      <rect
+        x={chartX}
+        y={gridTop}
+        width={chartWidth}
+        height={gridBottom - gridTop}
+        className="gantt-bg-weekday"
+      />
 
       {layout.weekendBands.map((weekend) => {
         const x1 = layout.xScale(weekend.start)
@@ -39,8 +32,7 @@ export function GanttGrid({ layout }: GanttGridProps) {
             y={gridTop}
             width={width}
             height={gridBottom - gridTop}
-            fill="#e0e7ff"
-            opacity={0.5}
+            className="gantt-bg-weekend"
           />
         )
       })}
@@ -50,29 +42,14 @@ export function GanttGrid({ layout }: GanttGridProps) {
         const x2 = layout.xScaleFromIso(chance.end)
         const width = Math.max(x2 - x1, 2)
         return (
-          <g key={`chance-${chance.start}-${chance.end}`}>
-            <rect
-              x={x1}
-              y={gridTop}
-              width={width}
-              height={gridBottom - gridTop}
-              className="gantt-chance-highlight"
-            />
-            <line
-              x1={x1}
-              y1={gridTop}
-              x2={x1}
-              y2={gridBottom}
-              className="gantt-chance-border"
-            />
-            <line
-              x1={x1 + width}
-              y1={gridTop}
-              x2={x1 + width}
-              y2={gridBottom}
-              className="gantt-chance-border"
-            />
-          </g>
+          <rect
+            key={`chance-${chance.start}-${chance.end}`}
+            x={x1}
+            y={gridTop}
+            width={width}
+            height={gridBottom - gridTop}
+            className="gantt-chance-highlight"
+          />
         )
       })}
 
@@ -120,7 +97,7 @@ export function GanttGrid({ layout }: GanttGridProps) {
       <line
         x1={LEFT_PAD}
         y1={layout.bodyBottom}
-        x2={layout.svgWidth - 16}
+        x2={layout.svgWidth - RIGHT_PAD}
         y2={layout.bodyBottom}
         className="gantt-axis-baseline"
       />

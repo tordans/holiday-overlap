@@ -47,17 +47,23 @@ body {
   display: block;
 }
 
+.gantt-bg-weekday {
+  fill: #ffffff;
+}
+
+.gantt-bg-weekend {
+  fill: #f1f5f9;
+}
+
 .gantt-week-line {
-  stroke: #e0e7ff;
+  stroke: #e2e8f0;
   stroke-width: 1;
-  opacity: 0.85;
   shape-rendering: crispEdges;
 }
 
 .gantt-month-line {
   stroke: #c7d2fe;
   stroke-width: 1.5;
-  opacity: 0.95;
   shape-rendering: crispEdges;
 }
 
@@ -79,8 +85,27 @@ body {
   font-family: var(--font-sans);
 }
 
+.gantt-row-dimmed {
+  opacity: 0.35;
+}
+
+.gantt-row-highlight-bg {
+  fill: rgb(99 102 241 / 0.12);
+  stroke: rgb(99 102 241 / 0.35);
+  stroke-width: 1;
+}
+
+.gantt-bar-highlighted .gantt-bar-rect {
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 6px rgb(99 102 241 / 0.45));
+}
+
 .gantt-bar-chance .gantt-bar-rect {
   filter: drop-shadow(0 1px 2px rgb(16 185 129 / 0.35));
+}
+
+.gantt-bar-chance.gantt-bar-highlighted .gantt-bar-rect {
+  filter: drop-shadow(0 2px 6px rgb(16 185 129 / 0.5));
 }
 
 .gantt-bar-label {
@@ -90,13 +115,6 @@ body {
 
 .gantt-chance-highlight {
   fill: rgb(52 211 153 / 0.14);
-}
-
-.gantt-chance-border {
-  stroke: var(--color-chance-deep);
-  stroke-width: 2;
-  opacity: 0.85;
-  shape-rendering: crispEdges;
 }
 
 .gantt-today-line {
