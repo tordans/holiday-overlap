@@ -1,0 +1,3 @@
+[install]
+# Match package.json minimumReleaseAge (432000s = 5 days)
+minimumReleaseAge = 432000
