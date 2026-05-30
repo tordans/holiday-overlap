@@ -19,7 +19,7 @@ export const ROW_MAX = ROW_MIN
 export const LEFT_PAD = 120
 export const TOP_PAD = 48
 export const RIGHT_PAD = 16
-export const MIN_CHART_WIDTH = 600
+export const MIN_WEEK_WIDTH = 40
 export const LABEL_PAD = 8
 export const FONT_SIZE = 14
 export const FONT_FAMILY = 'Inter Variable, ui-sans-serif, system-ui, sans-serif'
@@ -109,7 +109,16 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
   const bodyBottom = TOP_PAD + rowCount * rowHeight
   const svgHeight = bodyBottom
 
-  const availableWidth = Math.max(containerWidth, MIN_CHART_WIDTH)
+  const weekBands: WeekBand[] = []
+  let weekStart = startOfIsoWeek(domainStart)
+  while (weekStart < domainEnd) {
+    const weekEnd = addCalendarDays(weekStart, 7)
+    weekBands.push({ start: weekStart, end: weekEnd })
+    weekStart = weekEnd
+  }
+
+  const minChartWidth = LEFT_PAD + RIGHT_PAD + weekBands.length * MIN_WEEK_WIDTH
+  const availableWidth = Math.max(containerWidth, minChartWidth)
   const chartWidth = availableWidth - LEFT_PAD - RIGHT_PAD
   const svgWidth = LEFT_PAD + chartWidth + RIGHT_PAD
 
@@ -127,14 +136,6 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
   }
 
   const rowY = (index: number): number => TOP_PAD + index * rowHeight
-
-  const weekBands: WeekBand[] = []
-  let weekStart = startOfIsoWeek(domainStart)
-  while (weekStart < domainEnd) {
-    const weekEnd = addCalendarDays(weekStart, 7)
-    weekBands.push({ start: weekStart, end: weekEnd })
-    weekStart = weekEnd
-  }
 
   const weekendBands: WeekendBand[] = []
   for (const week of weekBands) {
