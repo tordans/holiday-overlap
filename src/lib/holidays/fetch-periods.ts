@@ -1,5 +1,5 @@
 import { expandBridgeDayPeriods, type HolidayPeriod } from './bridge-days'
-import { mergePeriodsByRange } from './merge-periods'
+import { mergeOverlappingPeriods, mergePeriodsByRange } from './merge-periods'
 
 export type { HolidayPeriod } from './bridge-days'
 
@@ -60,6 +60,12 @@ function overlapsYear(start: string, end: string, year: number): boolean {
   return startYear <= year && endYear >= year
 }
 
+export function processPublicHolidayPeriods(periods: HolidayPeriod[]): HolidayPeriod[] {
+  const deduped = mergePeriodsByRange(periods)
+  const expanded = expandBridgeDayPeriods(deduped)
+  return mergeOverlappingPeriods(expanded)
+}
+
 function normalizePeriods(items: ApiPeriod[], kind: PeriodKind, year: number): HolidayPeriod[] {
   const periods = items
     .filter((item) => overlapsYear(item.starts_on, item.ends_on, year))
@@ -69,13 +75,11 @@ function normalizePeriods(items: ApiPeriod[], kind: PeriodKind, year: number): H
       end: item.ends_on,
     }))
 
-  const merged = mergePeriodsByRange(periods)
-
   if (kind === 'holiday') {
-    return mergePeriodsByRange(expandBridgeDayPeriods(merged))
+    return processPublicHolidayPeriods(periods)
   }
 
-  return merged
+  return mergePeriodsByRange(periods)
 }
 
 export async function fetchPeriods(

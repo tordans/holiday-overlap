@@ -46,3 +46,30 @@ export function mergePeriodsByRange(periods: HolidayPeriod[]): HolidayPeriod[] {
 
   return [...byRange.values()]
 }
+
+function maxIsoDate(a: string, b: string): string {
+  return a >= b ? a : b
+}
+
+/** Merges periods whose date ranges overlap into one bar with combined labels. */
+export function mergeOverlappingPeriods(periods: HolidayPeriod[]): HolidayPeriod[] {
+  if (periods.length === 0) return []
+
+  const sorted = [...periods].sort((a, b) => a.start.localeCompare(b.start))
+  const merged: HolidayPeriod[] = [{ ...sorted[0]! }]
+
+  for (let index = 1; index < sorted.length; index++) {
+    const current = sorted[index]!
+    const last = merged[merged.length - 1]!
+
+    if (current.start <= last.end) {
+      last.end = maxIsoDate(last.end, current.end)
+      last.title = mergePeriodTitles(last.title, current.title)
+      continue
+    }
+
+    merged.push({ ...current })
+  }
+
+  return merged
+}
