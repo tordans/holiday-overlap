@@ -1,5 +1,4 @@
 import { getISODay } from 'date-fns'
-
 import { addCalendarDays, chartDateOptions, formatWithLocale, parseIsoDate } from '../dates'
 
 export type HolidayPeriod = {

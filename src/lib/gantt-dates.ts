@@ -1,9 +1,4 @@
-import {
-  daysBetween,
-  formatRelativeToNow,
-  formatWithLocale,
-  parseIsoDate,
-} from './dates'
+import { daysBetween, formatRelativeToNow, formatWithLocale, parseIsoDate } from './dates'
 
 function stripTrailingDot(text: string): string {
   return text.replace(/\.$/, '')

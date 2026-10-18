@@ -8,11 +8,7 @@ function rangeOverlapsYear(start: string, end: string, year: number): boolean {
   return startYear <= year && endYear >= year
 }
 
-function removeSectionRangesForYear(
-  data: GanttData,
-  sectionName: string,
-  year: number,
-): GanttData {
+function removeSectionRangesForYear(data: GanttData, sectionName: string, year: number): GanttData {
   const target = sectionName.trim().toLowerCase()
   return {
     sections: data.sections
@@ -29,19 +25,13 @@ function removeSectionRangesForYear(
   }
 }
 
-function periodExists(
-  data: GanttData,
-  sectionName: string,
-  period: HolidayPeriod,
-): boolean {
+function periodExists(data: GanttData, sectionName: string, period: HolidayPeriod): boolean {
   const target = sectionName.trim().toLowerCase()
   const section = data.sections.find((s) => s.name.toLowerCase() === target)
   if (!section) return false
   return section.ranges.some(
     (range) =>
-      range.name === period.title &&
-      range.start === period.start &&
-      range.end === period.end,
+      range.name === period.title && range.start === period.start && range.end === period.end,
   )
 }
 

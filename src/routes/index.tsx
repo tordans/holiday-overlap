@@ -1,14 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
-
 import { EditorDrawer } from '../components/EditorDrawer'
 import { GanttChart } from '../components/GanttChart'
 import { ShareButton } from '../components/ShareButton'
 import { cn } from '../lib/cn'
 import { DEFAULT_GANTT_DATA } from '../lib/constants'
 import { extractYears, flattenRows, formatYearRange, rangeHighlightKey } from '../lib/gantt-data'
-import { searchSchema, type SearchParams } from '../lib/search-schema'
 import type { GanttData } from '../lib/gantt-types'
+import { searchSchema, type SearchParams } from '../lib/search-schema'
 import { decodeGantt, encodeGantt } from '../lib/url-gantt'
 
 export const Route = createFileRoute('/')({
@@ -137,11 +136,7 @@ function HomePage() {
           onHighlightRangeKey={setHighlightedRangeKey}
         />
         <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <GanttChart
-            data={data}
-            highlightedRangeKey={highlightedRangeKey}
-            className="flex-1"
-          />
+          <GanttChart data={data} highlightedRangeKey={highlightedRangeKey} className="flex-1" />
         </main>
       </div>
     </div>

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-
 import { cn } from '../lib/cn'
 import {
   deleteRange,
@@ -9,7 +8,6 @@ import {
   insertRange,
   rangeHighlightKey,
 } from '../lib/gantt-data'
-import { ZeitraeumeSectionGroup } from './ZeitraeumeSectionGroup'
 import type { GanttData } from '../lib/gantt-types'
 import { applyPeriodsToGantt } from '../lib/holidays/apply-periods'
 import {
@@ -18,6 +16,7 @@ import {
   bundeslandByCode,
 } from '../lib/holidays/bundeslaender'
 import { fetchSchoolAndPublicHolidays } from '../lib/holidays/fetch-periods'
+import { ZeitraeumeSectionGroup } from './ZeitraeumeSectionGroup'
 
 const inputClass =
   'w-full rounded-lg border border-indigo-100 bg-white px-2.5 py-1.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200/60 focus:outline-none'

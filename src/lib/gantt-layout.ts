@@ -159,8 +159,7 @@ export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
   }
 
   const todayDate = today()
-  const todayX =
-    todayDate >= domainStart && todayDate <= domainEnd ? xScale(todayDate) : null
+  const todayX = todayDate >= domainStart && todayDate <= domainEnd ? xScale(todayDate) : null
 
   const chanceBands: ChanceBand[] = rows
     .filter((row) => row.kind === 'chance')

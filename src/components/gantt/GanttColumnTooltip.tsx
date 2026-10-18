@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-
 import { cn } from '../../lib/cn'
 import { formatDateTooltip } from '../../lib/gantt-dates'
 import { dateFromChartX, LEFT_PAD, type GanttLayout } from '../../lib/gantt-layout'
@@ -49,7 +48,7 @@ export function GanttChartOverlay({ layout, children }: GanttChartOverlayProps) 
 
   return (
     <>
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="pointer-events-none absolute inset-0">
         <div
           ref={chartAreaRef}
           className="pointer-events-auto absolute z-0 cursor-crosshair"
@@ -72,7 +71,9 @@ export function GanttChartOverlay({ layout, children }: GanttChartOverlayProps) 
               className={cn(
                 'pointer-events-none fixed z-50 max-w-xs -translate-y-1/2 rounded-lg border border-indigo-100',
                 'bg-white px-3 py-2 text-xs text-slate-700 shadow-lg shadow-indigo-200/40',
-                tip.clientX > window.innerWidth - 220 ? '-translate-x-[calc(100%+12px)]' : 'translate-x-3',
+                tip.clientX > window.innerWidth - 220
+                  ? '-translate-x-[calc(100%+12px)]'
+                  : 'translate-x-3',
               )}
               style={{
                 left: tip.clientX,

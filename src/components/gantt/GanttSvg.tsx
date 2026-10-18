@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-
 import { flattenRows, rangeHighlightKey } from '../../lib/gantt-data'
 import { computeLayout, FONT_FAMILY } from '../../lib/gantt-layout'
 import type { GanttData } from '../../lib/gantt-types'

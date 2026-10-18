@@ -1,5 +1,10 @@
 import { cn } from '../lib/cn'
-import { CHANCEN_SECTION, type FlatGanttRow, type GanttData, type GanttSection } from '../lib/gantt-types'
+import {
+  CHANCEN_SECTION,
+  type FlatGanttRow,
+  type GanttData,
+  type GanttSection,
+} from '../lib/gantt-types'
 import { TrashIcon } from './icons/TrashIcon'
 import { RangeListItem } from './RangeListItem'
 

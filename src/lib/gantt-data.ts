@@ -1,9 +1,4 @@
-import {
-  CHANCEN_SECTION,
-  type FlatGanttRow,
-  type GanttData,
-  type GanttRange,
-} from './gantt-types'
+import { CHANCEN_SECTION, type FlatGanttRow, type GanttData, type GanttRange } from './gantt-types'
 
 function computeRangeId(section: string, title: string): string {
   const raw = `${section}-${title}`
@@ -163,9 +158,7 @@ export function updateRange(
 
   const targetSection =
     updates.section?.trim() ||
-    (fromSection.toLowerCase() === CHANCEN_SECTION.toLowerCase()
-      ? CHANCEN_SECTION
-      : fromSection)
+    (fromSection.toLowerCase() === CHANCEN_SECTION.toLowerCase() ? CHANCEN_SECTION : fromSection)
   const name = updates.name?.trim() || existing.name
   const start = updates.start ?? existing.start
   const end = updates.end ?? existing.end

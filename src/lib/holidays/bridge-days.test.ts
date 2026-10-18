@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
-
 import { expandBridgeDayPeriod, expandBridgeDayPeriods } from './bridge-days'
-import { mergeOverlappingPeriods, mergePeriodsByRange } from './merge-periods'
 import { processPublicHolidayPeriods } from './fetch-periods'
+import { mergeOverlappingPeriods, mergePeriodsByRange } from './merge-periods'
 
 describe('expandBridgeDayPeriod', () => {
   it('extends Thursday through the following weekend to Sunday', () => {

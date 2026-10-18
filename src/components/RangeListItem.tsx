@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
-
 import { cn } from '../lib/cn'
-import {
-  flattenRows,
-  rangeHighlightKey,
-  updateRange,
-  type RangeUpdate,
-} from '../lib/gantt-data'
+import { flattenRows, rangeHighlightKey, updateRange, type RangeUpdate } from '../lib/gantt-data'
 import { CHANCEN_SECTION, type FlatGanttRow, type GanttData } from '../lib/gantt-types'
 import { TrashIcon } from './icons/TrashIcon'
 
@@ -156,7 +150,10 @@ export function RangeListItem({
               disabled={isChance}
               placeholder="Gruppe"
               aria-label="Gruppe"
-              className={cn(compactInputClass, isChance && 'cursor-not-allowed bg-slate-50 text-slate-500')}
+              className={cn(
+                compactInputClass,
+                isChance && 'cursor-not-allowed bg-slate-50 text-slate-500',
+              )}
             />
           )}
           <input

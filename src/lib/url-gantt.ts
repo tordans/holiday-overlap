@@ -1,5 +1,4 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string'
-
 import { DEFAULT_GANTT_DATA } from './constants'
 import { ganttDataSchema, type GanttData } from './gantt-types'
 

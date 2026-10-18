@@ -36,7 +36,7 @@ export function GanttWeekDayLines({ layout }: GanttWeekDayLinesProps) {
               return (
                 <div
                   key={dayIndex}
-                  className="pointer-events-none absolute top-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100 border-l border-dotted border-slate-300/35"
+                  className="pointer-events-none absolute top-0 border-l border-dotted border-slate-300/35 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                   style={{
                     left: dayLeft,
                     height: linesHeight,

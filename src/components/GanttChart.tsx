@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-
 import { cn } from '../lib/cn'
 import type { GanttData } from '../lib/gantt-types'
 import { GanttSvg } from './gantt/GanttSvg'
@@ -35,10 +34,7 @@ export function GanttChart({ data, highlightedRangeKey = null, className }: Gant
   return (
     <div
       ref={containerRef}
-      className={cn(
-        'gantt-chart h-full w-full min-h-0 min-w-0 flex-1 overflow-auto',
-        className,
-      )}
+      className={cn('gantt-chart h-full w-full min-h-0 min-w-0 flex-1 overflow-auto', className)}
     >
       <GanttSvg
         data={data}

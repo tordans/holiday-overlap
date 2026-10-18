@@ -27,7 +27,11 @@ export function GanttRow({
 
   return (
     <g
-      className={cn('gantt-row', isHighlighted && 'gantt-row-highlighted', isDimmed && 'gantt-row-dimmed')}
+      className={cn(
+        'gantt-row',
+        isHighlighted && 'gantt-row-highlighted',
+        isDimmed && 'gantt-row-dimmed',
+      )}
       pointerEvents="none"
     >
       {isHighlighted ? (
@@ -41,12 +45,7 @@ export function GanttRow({
         />
       ) : null}
       {row.isFirstInSection ? (
-        <text
-          x={8}
-          y={y + rowHeight / 2}
-          className="gantt-section-label"
-          dominantBaseline="middle"
-        >
+        <text x={8} y={y + rowHeight / 2} className="gantt-section-label" dominantBaseline="middle">
           {row.section}
         </text>
       ) : null}
