@@ -1,0 +1,87 @@
+# Private open-source repo: first Friday of the month (FMC tech-stack dependabot policy).
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: cron
+      cronjob: '0 7 * * FRI#1'
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 5
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      security-dev-tools:
+        applies-to: security-updates
+        patterns:
+          - 'oxlint*'
+          - 'oxfmt*'
+          - 'oxc-*'
+          - 'vitest*'
+          - 'knip*'
+          - '@types/*'
+          - 'typescript'
+          - '@typescript/typescript-*'
+      app-dev-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - '@vitejs/*'
+          - 'vite'
+          - 'browserslist*'
+          - 'eslint-plugin-compat'
+          - 'oxlint*'
+          - 'oxfmt'
+          - 'oxc-*'
+          - 'vitest'
+          - 'knip'
+          - '@types/*'
+          - 'typescript'
+          - '@typescript/typescript-*'
+        update-types:
+          - minor
+          - patch
+      app-framework-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - '@tanstack/*'
+          - '@tailwindcss/*'
+          - 'tailwindcss'
+          - 'react'
+          - 'react-dom'
+          - 'zod'
+        update-types:
+          - minor
+          - patch
+      app-prod-misc-patch:
+        applies-to: version-updates
+        update-types:
+          - patch
+        patterns:
+          - '*'
+        exclude-patterns:
+          - '@tanstack/*'
+          - '@tailwindcss/*'
+          - 'tailwindcss'
+          - 'react'
+          - 'react-dom'
+          - 'zod'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: cron
+      cronjob: '0 7 * * FRI#1'
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 5
+    open-pull-requests-limit: 1
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - '*'
