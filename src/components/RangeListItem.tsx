@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '../lib/cn'
 import { flattenRows, rangeHighlightKey, updateRange, type RangeUpdate } from '../lib/gantt-data'
 import { CHANCEN_SECTION, type FlatGanttRow, type GanttData } from '../lib/gantt-types'
@@ -37,12 +37,22 @@ export function RangeListItem({
   const [start, setStart] = useState(row.range.start)
   const [end, setEnd] = useState(row.range.end)
 
-  useEffect(() => {
+  // Reset the local draft when the underlying row changes (adjust state during render, no effect).
+  const sourceKey = [
+    row.section,
+    row.range.id,
+    row.range.name,
+    row.range.start,
+    row.range.end,
+  ].join('\u0000')
+  const [syncedKey, setSyncedKey] = useState(sourceKey)
+  if (syncedKey !== sourceKey) {
+    setSyncedKey(sourceKey)
     setSection(row.section)
     setName(row.range.name)
     setStart(row.range.start)
     setEnd(row.range.end)
-  }, [row.section, row.range.id, row.range.name, row.range.start, row.range.end])
+  }
 
   function commit() {
     const updates: RangeUpdate = {

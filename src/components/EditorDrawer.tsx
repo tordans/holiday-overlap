@@ -48,7 +48,7 @@ export function EditorDrawer({
 
   const defaultYear = () => {
     const years = extractYears(data)
-    return years.length > 0 ? years[years.length - 1] : new Date().getFullYear()
+    return years.at(-1) ?? new Date().getFullYear()
   }
 
   const [bundeslandCode, setBundeslandCode] = useState(DEFAULT_BUNDESLAND_CODE)

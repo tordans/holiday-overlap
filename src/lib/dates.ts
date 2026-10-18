@@ -16,7 +16,7 @@ const CHART_TIME_ZONE =
     ? (Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'Europe/Berlin')
     : 'Europe/Berlin'
 
-export const chartTz = tz(CHART_TIME_ZONE)
+const chartTz = tz(CHART_TIME_ZONE)
 
 export const chartDateOptions = { in: chartTz, locale: de } as const
 
@@ -24,16 +24,12 @@ export function parseIsoDate(iso: string): Date {
   return parseISO(iso, chartDateOptions)
 }
 
-export function now(): Date {
+function now(): Date {
   return new Date()
 }
 
 export function today(): Date {
   return startOfDay(now(), chartDateOptions)
-}
-
-export function startOfCalendarDay(date: Date): Date {
-  return startOfDay(date, chartDateOptions)
 }
 
 export function addCalendarDays(date: Date, amount: number): Date {

@@ -10,16 +10,15 @@ import {
 import { formatMonthLabel } from './gantt-dates'
 import type { FlatGanttRow } from './gantt-types'
 
-export const BAR_HEIGHT = 24
-export const BAR_TOP_PAD = 2
-export const DATE_LABEL_GAP = 5
-export const DATE_LABEL_HEIGHT = 12
-export const ROW_MIN = BAR_TOP_PAD + BAR_HEIGHT + DATE_LABEL_GAP + DATE_LABEL_HEIGHT
-export const ROW_MAX = ROW_MIN
+const BAR_HEIGHT = 24
+const BAR_TOP_PAD = 2
+const DATE_LABEL_GAP = 5
+const DATE_LABEL_HEIGHT = 12
+const ROW_MIN = BAR_TOP_PAD + BAR_HEIGHT + DATE_LABEL_GAP + DATE_LABEL_HEIGHT
 export const LEFT_PAD = 120
 export const TOP_PAD = 48
 export const RIGHT_PAD = 16
-export const MIN_WEEK_WIDTH = 40
+const MIN_WEEK_WIDTH = 40
 export const LABEL_PAD = 8
 export const FONT_SIZE = 14
 export const FONT_FAMILY = 'Inter Variable, ui-sans-serif, system-ui, sans-serif'
@@ -39,26 +38,26 @@ export type GanttLayoutInput = {
   containerHeight: number
 }
 
-export type WeekBand = {
+type WeekBand = {
   start: Date
   end: Date
 }
 
-export type WeekendBand = {
+type WeekendBand = {
   start: Date
   end: Date
 }
 
-export type MonthTick = {
+type MonthTick = {
   date: Date
   label: string
 }
 
-export type WeekTick = {
+type WeekTick = {
   date: Date
 }
 
-export type ChanceBand = {
+type ChanceBand = {
   start: string
   end: string
   name: string
@@ -88,10 +87,11 @@ export type GanttLayout = {
 
 export function computeLayout(input: GanttLayoutInput): GanttLayout | null {
   const { rows, containerWidth } = input
-  if (rows.length === 0) return null
+  const firstRow = rows[0]
+  if (!firstRow) return null
 
-  let minStart = parseIsoDate(rows[0].range.start)
-  let maxEnd = parseIsoDate(rows[0].range.end)
+  let minStart = parseIsoDate(firstRow.range.start)
+  let maxEnd = parseIsoDate(firstRow.range.end)
 
   for (const row of rows) {
     const start = parseIsoDate(row.range.start)

@@ -1,6 +1,6 @@
 import { FONT_FAMILY, FONT_SIZE, LABEL_PAD } from './gantt-layout'
 
-export type LabelPlacement = 'inside' | 'outsideLeft' | 'outsideRight'
+type LabelPlacement = 'inside' | 'outsideLeft' | 'outsideRight'
 
 export type LabelLayout = {
   placement: LabelPlacement
@@ -24,7 +24,7 @@ function getMeasureContext(): CanvasRenderingContext2D {
   return measureCanvas
 }
 
-export function measureTextWidth(text: string): number {
+function measureTextWidth(text: string): number {
   return getMeasureContext().measureText(text).width
 }
 

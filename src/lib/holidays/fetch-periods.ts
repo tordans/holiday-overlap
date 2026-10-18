@@ -5,7 +5,7 @@ export type { HolidayPeriod } from './bridge-days'
 
 const API_BASE = 'https://www.mehr-schulferien.de/api/v2.1'
 
-export type PeriodKind = 'vacation' | 'holiday'
+type PeriodKind = 'vacation' | 'holiday'
 
 type ApiPeriod = {
   name: string
@@ -82,7 +82,7 @@ function normalizePeriods(items: ApiPeriod[], kind: PeriodKind, year: number): H
   return mergePeriodsByRange(periods)
 }
 
-export async function fetchPeriods(
+async function fetchPeriods(
   slug: string,
   year: number,
   kind: PeriodKind,
@@ -109,11 +109,11 @@ export async function fetchPeriods(
   return periods
 }
 
-export async function fetchSchoolVacations(slug: string, year: number): Promise<HolidayPeriod[]> {
+async function fetchSchoolVacations(slug: string, year: number): Promise<HolidayPeriod[]> {
   return fetchPeriods(slug, year, 'vacation')
 }
 
-export async function fetchPublicHolidays(slug: string, year: number): Promise<HolidayPeriod[]> {
+async function fetchPublicHolidays(slug: string, year: number): Promise<HolidayPeriod[]> {
   return fetchPeriods(slug, year, 'holiday')
 }
 

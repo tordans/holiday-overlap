@@ -25,7 +25,9 @@ export function GanttBar({ row, rowIndex, layout, highlighted = false }: GanttBa
     row.range.end,
   )
   const colors =
-    row.kind === 'chance' ? CHANCE_COLORS : SECTION_COLORS[row.sectionIndex % SECTION_COLORS.length]
+    row.kind === 'chance'
+      ? CHANCE_COLORS
+      : (SECTION_COLORS[row.sectionIndex % SECTION_COLORS.length] ?? CHANCE_COLORS)
 
   const barLabel = formatBarLabel(row.range.name, row.range.start, row.range.end)
   const label = computeLabelLayout(barLabel, x, y, width, height, layout.svgWidth - 16)

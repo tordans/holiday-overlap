@@ -58,17 +58,20 @@ function HomePage() {
     setData(decodeGantt(search.g))
   }, [search.g])
 
-  useEffect(() => {
+  // Adjust state during render (React docs: "storing information from previous renders")
+  // instead of syncing it in an effect.
+  const [prevEditorOpen, setPrevEditorOpen] = useState(editorOpen)
+  if (prevEditorOpen !== editorOpen) {
+    setPrevEditorOpen(editorOpen)
     if (!editorOpen) setHighlightedRangeKey(null)
-  }, [editorOpen])
+  }
 
-  useEffect(() => {
-    if (!highlightedRangeKey) return
+  if (highlightedRangeKey !== null) {
     const exists = flattenRows(data).some(
       (row) => rangeHighlightKey(row.section, row.range.id) === highlightedRangeKey,
     )
     if (!exists) setHighlightedRangeKey(null)
-  }, [data, highlightedRangeKey])
+  }
 
   function handleDataChange(nextData: GanttData) {
     const encoded = encodeGantt(nextData)

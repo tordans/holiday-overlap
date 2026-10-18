@@ -13,7 +13,7 @@ function parseTitle(title: string): { names: string[]; isBridge: boolean } {
   return { names, isBridge }
 }
 
-export function mergePeriodTitles(a: string, b: string): string {
+function mergePeriodTitles(a: string, b: string): string {
   const first = parseTitle(a)
   const second = parseTitle(b)
   const names = [...new Set([...first.names, ...second.names])]

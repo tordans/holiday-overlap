@@ -18,7 +18,7 @@ export type GanttData = {
   sections: GanttSection[]
 }
 
-export type GanttRowKind = 'period' | 'chance'
+type GanttRowKind = 'period' | 'chance'
 
 export type FlatGanttRow = {
   section: string

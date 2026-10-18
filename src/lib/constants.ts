@@ -1,8 +1,6 @@
 import type { GanttData } from './gantt-types'
 import { CHANCEN_SECTION } from './gantt-types'
 
-export { CHANCEN_SECTION }
-
 export const DEFAULT_GANTT_DATA: GanttData = {
   sections: [
     {
